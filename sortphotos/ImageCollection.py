@@ -147,7 +147,3 @@ class ImageCollection(object):
             result += image.__repr__() + '\n'
         return result
 
-    def SaveIndex(self, indexFile):
-        with open(indexFile, "w") as of:
-            for image in self._content.values():
-                of.write(image.__repr__() + '\n')
