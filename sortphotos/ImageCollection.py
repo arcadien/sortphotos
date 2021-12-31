@@ -48,8 +48,7 @@ class ImageCollection(object):
     def CopyInto(self,
                  targetDirectory,
                  sort_format=None,
-                 copy_files=True,
-                 test=False):
+                 copy_files=True):
         """
         Use the internal data structure to copy media files
         into the target directory
@@ -67,11 +66,10 @@ class ImageCollection(object):
                 dirs = dir_structure.split('/')
                 for thedir in dirs:
                     dest_dir = os.path.join(dest_dir, thedir)
-                    if not os.path.exists(dest_dir) and not test:
+                    if not os.path.exists(dest_dir):
                         os.makedirs(dest_dir)
                 # setup destination file
                 dest_file = os.path.join(dest_dir, src_fileName)
-                # root, ext = os.path.splitext(dest_file)
             else:
                 # copy the same folder structure in the target
                 p = Path(src_file)
@@ -85,22 +83,16 @@ class ImageCollection(object):
                 p = Path(dest_file)
                 for thedir in p.parts[:-1]:
                     dest_dir = os.path.join(dest_dir, thedir)
-                    if not os.path.exists(dest_dir) and not test:
+                    if not os.path.exists(dest_dir):
                         os.makedirs(dest_dir)
             if copy_files:
-                if not test:
-                    targetPath = Path(dest_file)
-                    if not targetPath.is_file():
-                        shutil.copy2(src_file, dest_file)
-                    else:
-                        print('Skip copy, {0} already there'.format(dest_file))
+                targetPath = Path(dest_file)
+                if not targetPath.is_file():
+                    shutil.copy2(src_file, dest_file)
                 else:
-                    print('Copy {0} in {1}'.format(src_file, dest_file))
+                    print('Skip copy, {0} already there'.format(dest_file))
             else:
-                if not test:
-                    shutil.move(src_file, dest_file)
-                else:
-                    print('Mode {0} in {1}'.format(src_file, dest_file))
+                shutil.move(src_file, dest_file)
 
     def HashFile(self, src_file):
         hasher = hashlib.md5()
