@@ -30,7 +30,7 @@ def main():
     args['ignore_file_types'] = temp_args.ignore_file_types
 
     # traverse root directory, and list directories as dirs and files as files
-    collection = ImageCollection()
+    collection = ImageCollection.ImageCollection()
     collection.RecursiveAddDirectory(
         args['src_dir'],
         args['ignore_file_types'])
