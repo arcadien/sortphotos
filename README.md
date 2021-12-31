@@ -39,3 +39,12 @@ optional arguments:
   --ignore-file-types IGNORE_FILE_TYPES [IGNORE_FILE_TYPES ...]
                         ignore file type. Default is to only ignore hidden files (.*)
 ```
+
+## Output 
+
+Symbol meaning in output:
+- `.`: new file added in collection
+- `+`: duplicate detected
+- `-`: file copied
+- `#`: file moved
+- `~`: file skipped (target exists)

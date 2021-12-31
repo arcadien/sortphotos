@@ -28,7 +28,6 @@ class ImageCollection(object):
         return len(self._content)
 
     def RecursiveAddDirectory(self, directory, ignore_file_types=[]):
-        # print('Building image collection..')
         with ExifTool(verbose=0) as e:
             for (path, dirs, files) in os.walk(directory):
                 for file in files:
@@ -37,13 +36,9 @@ class ImageCollection(object):
                     fileextension = fileextension.upper().replace('.', '')
                     if fileextension in map(str.upper, ignore_file_types):
                         print(fileextension + ' files ignored, "' +
-                              file + '" skipped')
-                        print()
+                              file + '" skipped' + "\n")
                         continue
-
-                    # print('.', end='')
                     self.AddFile(os.path.join(path, file), e)
-        # print('\nDone.')
 
     def CopyInto(self,
                  targetDirectory,
@@ -54,7 +49,7 @@ class ImageCollection(object):
         into the target directory
         """
         for image in self._content.values():
-
+            print("\n")
             date = image.creationDate
             src_file = image._metadata['SourceFile']
             src_fileName = os.path.basename(src_file)
@@ -76,10 +71,6 @@ class ImageCollection(object):
                 pathWithoutFirstLevel = Path(*p.parts[2:])
                 dest_file = os.path.join(dest_dir, pathWithoutFirstLevel)
                 dest_file = os.path.normpath(dest_file)
-                print('dest_dir   : {0}'.format(dest_dir))
-                print('Input path : {0}'.format(src_file))
-                print('Output file: {0}'.format(dest_file))
-
                 p = Path(dest_file)
                 for thedir in p.parts[:-1]:
                     dest_dir = os.path.join(dest_dir, thedir)
@@ -89,10 +80,12 @@ class ImageCollection(object):
                 targetPath = Path(dest_file)
                 if not targetPath.is_file():
                     shutil.copy2(src_file, dest_file)
+                    print("-", end='')
                 else:
-                    print('Skip copy, {0} already there'.format(dest_file))
+                    print("~", end='')
             else:
                 shutil.move(src_file, dest_file)
+                print("#", end='')
 
     def HashFile(self, src_file):
         hasher = hashlib.md5()
@@ -132,11 +125,13 @@ class ImageCollection(object):
             metadataDict['Hash'] = fileHash
             image = Image(metadataDict)
             self._content[fileHash] = image
+            print('.', end='')
         else:
             metadataDict['SourceFile'] = filePath
             metadataDict['Hash'] = fileHash
             image = Image(metadataDict)
             self._content[fileHash].AddDuplicate(image)
+            print('+', end='')
 
         self.totalImageCount = self.totalImageCount + 1
         return
