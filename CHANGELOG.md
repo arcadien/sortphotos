@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.2] - 2022-01-01
+### Fixed
+- Gihub CI script was emergency fixed
+
 ## [0.9.1] - 2022-01-01
 ### Fixed
 - Output in report mode
