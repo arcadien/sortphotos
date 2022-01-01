@@ -49,7 +49,6 @@ class ImageCollection(object):
         into the target directory
         """
         for image in self._content.values():
-            print("\n")
             date = image.creationDate
             src_file = image._metadata['SourceFile']
             src_fileName = os.path.basename(src_file)
@@ -141,3 +140,4 @@ class ImageCollection(object):
         for image in self._content.values():
             result += image.__repr__() + '\n'
         return result
+
