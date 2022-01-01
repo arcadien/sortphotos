@@ -17,7 +17,7 @@ class Test_ImageCollection(unittest.TestCase):
         actual = imageCollection.HashFile("test-in/test_HashFile.txt")
         expected = "65b1e8826c261ee5cc0b0f9d9b8f01f2"
         self.assertEqual(actual, expected,
-                         "Computation of file hash should be a MD5 one")
+                         "Computation of file hash should finish and be right")
 
     def test_AddFile(self):
         imageCollection = ImageCollection()
