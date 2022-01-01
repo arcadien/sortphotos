@@ -32,8 +32,8 @@ jobs:
         run: python test_ImageCollection.py
       - name: Prepare release
         run: |
-        (cd sortphotos/exiftool/ && rm -rf html/ fmt_files/ Makefile.PL META.* t validate windows_exiftool pp_build_exe.args perl-Image-ExifTool.spec config_files Changes build_tag_lookup arg_files)
-        zip -r sortphotos.zip example.png README.md sortphotos.py sortphotos
+          (cd sortphotos/exiftool/ && rm -rf html/ fmt_files/ Makefile.PL META.* t validate windows_exiftool pp_build_exe.args perl-Image-ExifTool.spec config_files Changes build_tag_lookup arg_files)
+          zip -r sortphotos.zip example.png README.md sortphotos.py sortphotos
       - name: Release
         uses: docker://antonyurchenko/git-release:latest
         if: startsWith(github.ref, 'refs/tags/')
