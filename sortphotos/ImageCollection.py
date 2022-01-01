@@ -140,4 +140,3 @@ class ImageCollection(object):
         for image in self._content.values():
             result += image.__repr__() + '\n'
         return result
-
