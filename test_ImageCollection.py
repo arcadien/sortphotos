@@ -166,7 +166,7 @@ class Test_CopyInto(unittest.TestCase):
 
 
 def RemoveDir(toRemoveIfExist):
-    if(path.isdir(toRemoveIfExist)):
+    if path.isdir(toRemoveIfExist):
         try:
             shutil.rmtree(toRemoveIfExist)
         except OSError as e:

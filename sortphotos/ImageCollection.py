@@ -60,7 +60,7 @@ class ImageCollection(object):
             src_fileName = os.path.basename(src_file)
             dest_dir = targetDirectory
 
-            if(sort_format is not None):
+            if sort_format is not None:
                 # folder structure from date
                 dirs = date.strftime(sort_format).split('/')
                 dest_file = os.path.join(dest_dir, *dirs, src_fileName)
@@ -127,11 +127,11 @@ class ImageCollection(object):
         return (hasher.hexdigest())
 
     def AddFile(self, filePath, exifTool):
-        if(0 == len(filePath)):
+        if 0 == len(filePath):
             return
         fileHash = self.HashFile(filePath)
         metadataDict = dict()
-        if(not self._content.get(fileHash)):
+        if not self._content.get(fileHash):
             self._content[fileHash] = []
             # -j : json outputclear()
             # '-CreateDate', '-FileCreateDate': extract only these tags
