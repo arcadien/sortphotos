@@ -5,6 +5,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- Metadata is read in pure Python (exifread, hachoir): ExifTool and Perl
+  are no longer needed
+- Packaged with pyproject.toml, install with
+  `uv tool install git+https://github.com/arcadien/sortphotos`
+- Python 3.10 or later is required
+### Removed
+- `sortphotos.py` script: use the `sortphotos` command, `uv run sortphotos`
+  or `python -m sortphotos`
+- IPTC/XMP `DateCreated` tag is no longer read
 ### Fixed
 - Timestamps with a time zone (e.g. `+01:00`, `Z`) were ignored; they are now
   sorted by the local time as written, without offset adjustment
