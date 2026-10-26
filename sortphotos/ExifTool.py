@@ -38,8 +38,14 @@ class ExifTool(object):
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
-        self.process.stdin.write(b'-stay_open\nFalse\n')
-        self.process.stdin.flush()
+        try:
+            self.process.stdin.write(b'-stay_open\nFalse\n')
+            self.process.stdin.flush()
+            self.process.stdin.close()
+        except BrokenPipeError:
+            pass  # process already gone
+        self.process.wait()
+        self.process.stdout.close()
 
     def execute(self, *args):
         args = args + ("-execute\n",)
