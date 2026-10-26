@@ -5,7 +5,6 @@ import io
 import tempfile
 from contextlib import redirect_stdout
 from datetime import datetime
-from os import path
 
 from sortphotos.ImageCollection import ImageCollection
 from sortphotos.ExifTool import ExifTool
@@ -13,13 +12,14 @@ from sortphotos.Image import Image
 
 # Constants
 imageFileName_1 = "81984ab0bd8e9c4079a42dcd0d739607_20210102_143116.jpg"
+testDataDirectory = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test-data")
 
 
 class Test_ImageCollection(unittest.TestCase):
 
     def test_HashFile(self):
         imageCollection = ImageCollection()
-        actual = imageCollection.HashFile("test-in/test_HashFile.txt")
+        actual = imageCollection.HashFile(self.InPath("test_HashFile.txt"))
         expected = "65b1e8826c261ee5cc0b0f9d9b8f01f2"
         self.assertEqual(actual, expected,
                          "Computation of file hash should finish and be right")
@@ -27,15 +27,15 @@ class Test_ImageCollection(unittest.TestCase):
     def test_AddFile(self):
         imageCollection = ImageCollection()
         with ExifTool(verbose=0) as exiftool:
-            imageCollection.AddFile("test-in/" + imageFileName_1, exiftool)
-            imageCollection.AddFile("test-in/" + imageFileName_1, exiftool)
+            imageCollection.AddFile(self.InPath(imageFileName_1), exiftool)
+            imageCollection.AddFile(self.InPath(imageFileName_1), exiftool)
         actual = imageCollection.GetUniqueImageCount()
         expected = 1
         self.assertEqual(
             actual, expected, "Only one image file should be processed (duplicated)")
 
         image = list(imageCollection._content.values())[0]
-        self.assertEqual(image._duplicates, ["test-in/" + imageFileName_1],
+        self.assertEqual(image._duplicates, [self.InPath(imageFileName_1)],
                          "The duplicate file path should be recorded")
 
         actual = imageCollection.totalImageCount
@@ -49,7 +49,7 @@ class Test_ImageCollection(unittest.TestCase):
                 return []
 
         imageCollection = ImageCollection()
-        imageCollection.AddFile("test-in/test_HashFile.txt",
+        imageCollection.AddFile(self.InPath("test_HashFile.txt"),
                                 NoMetadataExifTool())
         self.assertEqual(imageCollection.GetUniqueImageCount(), 1,
                          "A file without metadata should still be added")
@@ -80,18 +80,18 @@ class Test_ImageCollection(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        os.makedirs("test-in")
-        os.makedirs("test-out")
-        f = open("test-in/test_HashFile.txt", "w+")
-        f.write("This is a wonderful content")
-        f.close()
-        shutil.copyfile("test-data/" + imageFileName_1,
-                        "test-in/" + imageFileName_1)
+        cls.inDirectory = tempfile.mkdtemp()
+        with open(os.path.join(cls.inDirectory, "test_HashFile.txt"), "w") as f:
+            f.write("This is a wonderful content")
+        shutil.copyfile(os.path.join(testDataDirectory, imageFileName_1),
+                        os.path.join(cls.inDirectory, imageFileName_1))
 
     @classmethod
     def tearDownClass(cls):
-        RemoveDir("test-in")
-        RemoveDir("test-out")
+        shutil.rmtree(cls.inDirectory)
+
+    def InPath(self, fileName):
+        return os.path.join(self.inDirectory, fileName)
 
 
 class Test_ParseExifDate(unittest.TestCase):
@@ -227,14 +227,6 @@ class Test_ExifTool(unittest.TestCase):
         self.assertEqual(exiftool.execute('-j').rstrip(), text,
                          "Output should be decoded once complete")
         exiftool.process.stdout.close()
-
-
-def RemoveDir(toRemoveIfExist):
-    if path.isdir(toRemoveIfExist):
-        try:
-            shutil.rmtree(toRemoveIfExist)
-        except OSError as e:
-            print("Error: %s : %s" % (toRemoveIfExist, e.strerror))
 
 
 if __name__ == '__main__':
