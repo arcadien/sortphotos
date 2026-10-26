@@ -5,8 +5,13 @@ SortPhotos is a Python script that organizes photos into folders by date and/or 
 Note: Due to the use of ExifTool software, a Perl interpreter shall be available in the running environment.
 
 # Download
-Find the lastest version here:
+Find the latest version here:
 https://github.com/arcadien/sortphotos
+
+To install it as a `sortphotos` command, from a clone with submodules:
+
+    git clone --recurse-submodules https://github.com/arcadien/sortphotos
+    pip install ./sortphotos
 
 # Usage
 
@@ -14,7 +19,9 @@ SortPhotos is intended to be used primarily from the command line.  To see all t
 
     python sortphotos.py -h
 
-The simplest usage is to specify a source directory (the directory where your mess of files is currently located) and a destination directory (where you want the files and directories to go).  By default the source directory it is not searched recursively but that can changed with a flag as discussed below.
+or `sortphotos -h` once installed.
+
+The simplest usage is to specify a source directory (the directory where your mess of files is currently located) and a destination directory (where you want the files and directories to go).  The source directory is searched recursively, and files are moved unless `-c` is given.
 
     python sortphotos.py /Users/Me/MessyDirectory /Users/Me/Pictures
 
@@ -25,19 +32,23 @@ positional arguments:
   src_dir               source directory
   dest_dir              destination directory
 
-optional arguments:
+options:
   -h, --help            show this help message and exit
   -c, --copy            copy files instead of move
-  -t, --test            run a test.  files will not be moved/copied
-                        instead you will just a list of would happen
-  --sort SORT           choose destination folder structure using datetime format 
-                        https://docs.python.org/2/library/datetime.html#strftime-and-strptime-behavior. 
-                        Use forward slashes / to indicate subdirectory(ies) (independent of your OS convention). 
-                        The default is '%Y/%m-%b', which separates by year then month 
+  -t, --test            run a test: files will not be moved/copied,
+                        instead you will just get a list of what would happen
+  --sort SORT           choose destination folder structure using datetime format
+                        https://docs.python.org/3/library/datetime.html#strftime-and-strptime-behavior.
+                        Use forward slashes / to indicate subdirectory(ies)
+                        (independent of your OS convention).
+                        The default is '%Y/%m-%b', which separates by year then month
                         with both the month number and name (e.g., 2012/02-Feb).
   --ignore-file-types IGNORE_FILE_TYPES [IGNORE_FILE_TYPES ...]
-                        ignore file type. Default is to only ignore hidden files (.*)
+                        ignore file types (extensions, e.g. JPG MOV)
+                        hidden files (.*) are always ignored
 ```
+
+Month and day names (`%b`, `%B`, `%a`...) follow your system language, e.g. `2021/01-janv.` with a French locale.
 
 ## Output 
 
