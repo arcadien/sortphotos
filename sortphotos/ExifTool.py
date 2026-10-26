@@ -45,13 +45,19 @@ class ExifTool(object):
         args = args + ("-execute\n",)
         self.process.stdin.write(str.join("\n", args).encode('utf-8'))
         self.process.stdin.flush()
-        output = ""
+        # accumulate raw bytes and decode once complete: a chunk may
+        # end in the middle of a multi-byte UTF-8 character
+        output = b""
+        sentinel = self.sentinel.encode('utf-8')
         fd = self.process.stdout.fileno()
-        while not output.rstrip(' \t\n\r').endswith(self.sentinel):
+        while not output.rstrip(b' \t\n\r').endswith(sentinel):
             increment = os.read(fd, 4096)
-            if self.verbose:
-                sys.stdout.write(increment.decode('utf-8'))
-            output += increment.decode('utf-8')
+            if not increment:
+                raise RuntimeError('ExifTool terminated unexpectedly')
+            output += increment
+        output = output.decode('utf-8')
+        if self.verbose:
+            sys.stdout.write(output)
         return output.rstrip(' \t\n\r')[:-len(self.sentinel)]
 
     def get_metadata(self, *args):

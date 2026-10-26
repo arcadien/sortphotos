@@ -165,6 +165,27 @@ class Test_CopyInto(unittest.TestCase):
                       "Dry run should report the renamed destination")
 
 
+class Test_ExifTool(unittest.TestCase):
+
+    class FakeProcess(object):
+        def __init__(self, output):
+            self.stdin = io.BytesIO()
+            readEnd, writeEnd = os.pipe()
+            os.write(writeEnd, output)
+            os.close(writeEnd)
+            self.stdout = os.fdopen(readEnd, 'rb')
+
+    def test_MultiByteCharacterAcrossChunks(self):
+        # 'é' is two bytes: put it across the 4096 bytes read boundary
+        text = 'a' * 4095 + 'é' + 'b' * 10
+        exiftool = ExifTool()
+        exiftool.process = self.FakeProcess(
+            (text + '\n' + ExifTool.sentinel + '\n').encode('utf-8'))
+        self.assertEqual(exiftool.execute('-j').rstrip(), text,
+                         "Output should be decoded once complete")
+        exiftool.process.stdout.close()
+
+
 def RemoveDir(toRemoveIfExist):
     if path.isdir(toRemoveIfExist):
         try:
