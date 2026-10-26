@@ -156,10 +156,7 @@ class ImageCollection(object):
             self._content[fileHash] = image
             print('.', end='')
         else:
-            metadataDict['SourceFile'] = filePath
-            metadataDict['Hash'] = fileHash
-            image = Image(metadataDict)
-            self._content[fileHash].AddDuplicate(image)
+            self._content[fileHash].AddDuplicate(filePath)
             print('+', end='')
 
         self.totalImageCount = self.totalImageCount + 1

@@ -34,6 +34,10 @@ class Test_ImageCollection(unittest.TestCase):
         self.assertEqual(
             actual, expected, "Only one image file should be processed (duplicated)")
 
+        image = list(imageCollection._content.values())[0]
+        self.assertEqual(image._duplicates, ["test-in/" + imageFileName_1],
+                         "The duplicate file path should be recorded")
+
         actual = imageCollection.totalImageCount
         expected = 2
         self.assertEqual(actual, expected,
