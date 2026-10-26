@@ -8,9 +8,7 @@ setup(
     version='0.9.2',
     description='Organizes photos and videos into folders using date/time information',
     author='Andrew Ning',
-    packages=find_packages(exclude=['sortphotos.exiftool*']),
-    # ExifTool is shipped as package data, see MANIFEST.in
-    include_package_data=True,
+    packages=find_packages(),
     python_requires='>=3.8',
     install_requires=['exifread>=3.5,<4', 'hachoir>=3.4,<4'],
     license='MIT License',

@@ -36,6 +36,5 @@ nosetests.xml
 .project
 .pydevproject
 
-!src/Image-ExifTool/lib
 *.bak
 .vscode/settings.json

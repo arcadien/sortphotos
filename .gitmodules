@@ -1,3 +1,0 @@
-[submodule "sortphotos/exiftool"]
-	path = sortphotos/exiftool
-	url = https://github.com/exiftool/exiftool.git
