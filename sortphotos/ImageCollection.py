@@ -3,7 +3,6 @@
 from __future__ import print_function
 from __future__ import with_statement
 import os
-import sys
 import shutil
 
 import hashlib
@@ -144,11 +143,12 @@ class ImageCollection(object):
                 filePath]
 
             try:
-                metadataDict = exifTool.get_metadata(*args)[0]
-
-            except:  # noqa: E722
-                message = "Unexpected error extracting metadata from '{0}'"
-                print(message.format(filePath), sys.exc_info()[0])
+                metadata = exifTool.get_metadata(*args)
+                if metadata:
+                    metadataDict = metadata[0]
+            except Exception as e:
+                message = "Unexpected error extracting metadata from '{0}': {1}"
+                print(message.format(filePath, e))
 
             metadataDict['SourceFile'] = filePath
             metadataDict['Hash'] = fileHash

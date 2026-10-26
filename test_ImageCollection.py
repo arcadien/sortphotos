@@ -39,6 +39,17 @@ class Test_ImageCollection(unittest.TestCase):
         self.assertEqual(actual, expected,
                          "Two image processed, with one duplicate")
 
+    def test_AddFileWithoutMetadata(self):
+        class NoMetadataExifTool(object):
+            def get_metadata(self, *args):
+                return []
+
+        imageCollection = ImageCollection()
+        imageCollection.AddFile("test-in/test_HashFile.txt",
+                                NoMetadataExifTool())
+        self.assertEqual(imageCollection.GetUniqueImageCount(), 1,
+                         "A file without metadata should still be added")
+
     def test_InstancesDoNotShareContent(self):
         first = ImageCollection()
         first._content['somehash'] = None

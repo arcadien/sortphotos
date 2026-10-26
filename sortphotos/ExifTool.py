@@ -67,7 +67,9 @@ class ExifTool(object):
         return output.rstrip(' \t\n\r')[:-len(self.sentinel)]
 
     def get_metadata(self, *args):
+        """Return the list of metadata dicts, empty if none could be read"""
         try:
             return json.loads(self.execute(*args))
         except ValueError:
             sys.stdout.write('No files to parse or invalid data\n')
+            return []
