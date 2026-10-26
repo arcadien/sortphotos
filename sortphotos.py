@@ -5,6 +5,10 @@ from sortphotos import ImageCollection
 
 def main():
     import argparse
+    import locale
+
+    # use the user's locale, e.g. for month names in folder names (%b)
+    locale.setlocale(locale.LC_ALL, '')
 
     # setup command line parsing
     parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter,
