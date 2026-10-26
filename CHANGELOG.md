@@ -12,6 +12,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `--test` and `--copy` options had no effect
 - Files with the same name were skipped (copy) or overwritten (move)
 - Image collections shared their content between instances
+- Accented file names could crash metadata reading (UTF-8 split across reads)
+- ExifTool process was not waited for on exit
+- Folder structure was wrong when copying without sort format
+- Hidden files and directories were not ignored as documented
+- Importing the package changed the process locale
+- Help text showed stray backslashes
+- Package could not be installed (`pip install`), now provides a
+  `sortphotos` command
+- Progress symbols were displayed in bursts
+### Other
+- CI uses Python 3.15, runs on pull requests and lints the whole project
+- Tests run in temporary directories
+- Code cleanup
 
 ## [0.9.2] - 2022-01-01
 ### Fixed
