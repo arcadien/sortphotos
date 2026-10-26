@@ -1,14 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function
-from __future__ import with_statement
 import subprocess
 import os
 import sys
-try:
-    import json
-except ImportError:
-    import simplejson as json
+import json
 
 # Perl script for Exif data extraction
 exiftool_location = os.path.join(os.path.dirname(os.path.realpath(__file__)),

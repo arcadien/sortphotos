@@ -35,20 +35,13 @@ def main():
                              'hidden files (.*) are always ignored')
 
     # parse command line arguments
-    temp_args = parser.parse_args()
-    args = dict()
-    args['src_dir'] = temp_args.src_dir
-    args['dest_dir'] = temp_args.dest_dir
-    args['sort_format'] = temp_args.sort
-    args['copy_files'] = temp_args.copy
-    args['test'] = temp_args.test
-    args['ignore_file_types'] = temp_args.ignore_file_types
+    args = parser.parse_args()
 
     # traverse root directory, and list directories as dirs and files as files
     collection = ImageCollection.ImageCollection()
     collection.RecursiveAddDirectory(
-        args['src_dir'],
-        args['ignore_file_types'])
+        args.src_dir,
+        args.ignore_file_types)
 
     print('Unique/total image count: {:5d}/{:5d}'.format(
         collection.GetUniqueImageCount(),
@@ -56,10 +49,10 @@ def main():
 
     print(collection)
 
-    collection.CopyInto(args['dest_dir'],
-                        args['sort_format'],
-                        copy_files=args['copy_files'],
-                        dry_run=args['test'])
+    collection.CopyInto(args.dest_dir,
+                        args.sort,
+                        copy_files=args.copy,
+                        dry_run=args.test)
 
 
 if __name__ == '__main__':

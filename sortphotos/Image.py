@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function
-from __future__ import with_statement
 import os
 from datetime import datetime
 import re
@@ -9,13 +7,13 @@ import re
 
 class Image(object):
 
-    def __init__(self, metadata={}):
+    def __init__(self, metadata):
         self._metadata = metadata
         self._duplicates = []
         # path used to rebuild the folder structure in the target,
         # relative to the source directory (file name by default)
         self.relativePath = os.path.basename(metadata.get('SourceFile', ''))
-        filename, self.creationDate, keys = self._GetOldestTimestamp()
+        _, self.creationDate, _ = self._GetOldestTimestamp()
 
     def __repr__(self):
         sourceFile = self._metadata.get('SourceFile', 'unknown')
@@ -29,11 +27,6 @@ class Image(object):
 
     def AddDuplicate(self, filePath):
         self._duplicates.append(filePath)
-
-    """ Return true if the file has a creation date, false otherwise """
-
-    def IsValid(self):
-        return True
 
     """
     extract date info from EXIF data

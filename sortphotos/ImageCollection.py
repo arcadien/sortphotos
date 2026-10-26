@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function
-from __future__ import with_statement
 import os
 import shutil
 
@@ -26,7 +24,7 @@ class ImageCollection(object):
     def GetUniqueImageCount(self):
         return len(self._content)
 
-    def RecursiveAddDirectory(self, directory, ignore_file_types=[]):
+    def RecursiveAddDirectory(self, directory, ignore_file_types=()):
         with ExifTool(verbose=0) as e:
             for (path, dirs, files) in os.walk(directory):
                 # skip hidden directories and files (.*)
@@ -137,8 +135,7 @@ class ImageCollection(object):
         fileHash = self.HashFile(filePath)
         metadataDict = dict()
         if not self._content.get(fileHash):
-            self._content[fileHash] = []
-            # -j : json outputclear()
+            # -j : json output
             # '-CreateDate', '-FileCreateDate': extract only these tags
             args = [
                 '-j',
