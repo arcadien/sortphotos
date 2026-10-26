@@ -12,6 +12,7 @@ setup(
     # ExifTool is shipped as package data, see MANIFEST.in
     include_package_data=True,
     python_requires='>=3.8',
+    install_requires=['exifread>=3.5,<4', 'hachoir>=3.4,<4'],
     license='MIT License',
     entry_points={
         'console_scripts': [

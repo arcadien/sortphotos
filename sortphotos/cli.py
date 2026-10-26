@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from sortphotos import ImageCollection
+from sortphotos.MetadataReader import MetadataReader
 
 
 def main():
@@ -9,6 +10,8 @@ def main():
 
     # use the user's locale, e.g. for month names in folder names (%b)
     locale.setlocale(locale.LC_ALL, '')
+
+    MetadataReader.QuietLibraries()
 
     # setup command line parsing
     parser = argparse.ArgumentParser(

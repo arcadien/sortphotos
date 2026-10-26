@@ -5,7 +5,7 @@ import shutil
 
 import hashlib
 
-from sortphotos.ExifTool import ExifTool
+from sortphotos.MetadataReader import MetadataReader
 from sortphotos.Image import Image
 
 
@@ -17,7 +17,8 @@ from sortphotos.Image import Image
 # for the given hash.
 class ImageCollection(object):
 
-    def __init__(self):
+    def __init__(self, metadataReader=None):
+        self._metadataReader = metadataReader or MetadataReader()
         self._content = {}
         self.totalImageCount = 0
 
@@ -25,21 +26,20 @@ class ImageCollection(object):
         return len(self._content)
 
     def RecursiveAddDirectory(self, directory, ignore_file_types=()):
-        with ExifTool(verbose=0) as e:
-            for (path, dirs, files) in os.walk(directory):
-                # skip hidden directories and files (.*)
-                dirs[:] = [d for d in dirs if not d.startswith('.')]
-                for file in files:
-                    if file.startswith('.'):
-                        continue
-                    # ignore specified file extensions
-                    fileextension = os.path.splitext(file)[-1]
-                    fileextension = fileextension.upper().replace('.', '')
-                    if fileextension in map(str.upper, ignore_file_types):
-                        print(fileextension + ' files ignored, "' +
-                              file + '" skipped' + "\n")
-                        continue
-                    self.AddFile(os.path.join(path, file), e, directory)
+        for (path, dirs, files) in os.walk(directory):
+            # skip hidden directories and files (.*)
+            dirs[:] = [d for d in dirs if not d.startswith('.')]
+            for file in files:
+                if file.startswith('.'):
+                    continue
+                # ignore specified file extensions
+                fileextension = os.path.splitext(file)[-1]
+                fileextension = fileextension.upper().replace('.', '')
+                if fileextension in map(str.upper, ignore_file_types):
+                    print(fileextension + ' files ignored, "' +
+                          file + '" skipped' + "\n")
+                    continue
+                self.AddFile(os.path.join(path, file), directory)
 
     def CopyInto(self,
                  targetDirectory,
@@ -124,7 +124,7 @@ class ImageCollection(object):
                 b = afile.read(65536)
         return (hasher.hexdigest())
 
-    def AddFile(self, filePath, exifTool, sourceDirectory=None):
+    def AddFile(self, filePath, sourceDirectory=None):
         """
         Add a file to the collection. sourceDirectory is the root the
         file was found in, used to keep the folder structure when
@@ -135,20 +135,8 @@ class ImageCollection(object):
         fileHash = self.HashFile(filePath)
         metadataDict = dict()
         if not self._content.get(fileHash):
-            # -j : json output
-            # '-CreateDate', '-FileCreateDate': extract only these tags
-            args = [
-                '-j',
-                # '-time:all',
-                '-CreateDate',
-                '-DateCreated',
-                '-FileCreateDate',
-                filePath]
-
             try:
-                metadata = exifTool.get_metadata(*args)
-                if metadata:
-                    metadataDict = metadata[0]
+                metadataDict = self._metadataReader.GetMetadata(filePath)
             except Exception as e:
                 message = "Unexpected error extracting metadata from '{0}': {1}"
                 print(message.format(filePath, e))

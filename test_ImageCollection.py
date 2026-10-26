@@ -2,17 +2,20 @@ import unittest
 import shutil
 import os.path
 import io
+import struct
 import tempfile
 from contextlib import redirect_stdout
 from datetime import datetime
 
 from sortphotos.ImageCollection import ImageCollection
-from sortphotos.ExifTool import ExifTool
+from sortphotos.MetadataReader import MetadataReader
 from sortphotos.Image import Image
 
 # Constants
 imageFileName_1 = "81984ab0bd8e9c4079a42dcd0d739607_20210102_143116.jpg"
 testDataDirectory = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test-data")
+
+MetadataReader.QuietLibraries()
 
 
 class Test_ImageCollection(unittest.TestCase):
@@ -26,9 +29,8 @@ class Test_ImageCollection(unittest.TestCase):
 
     def test_AddFile(self):
         imageCollection = ImageCollection()
-        with ExifTool(verbose=0) as exiftool:
-            imageCollection.AddFile(self.InPath(imageFileName_1), exiftool)
-            imageCollection.AddFile(self.InPath(imageFileName_1), exiftool)
+        imageCollection.AddFile(self.InPath(imageFileName_1))
+        imageCollection.AddFile(self.InPath(imageFileName_1))
         actual = imageCollection.GetUniqueImageCount()
         expected = 1
         self.assertEqual(
@@ -44,13 +46,12 @@ class Test_ImageCollection(unittest.TestCase):
                          "Two image processed, with one duplicate")
 
     def test_AddFileWithoutMetadata(self):
-        class NoMetadataExifTool(object):
-            def get_metadata(self, *args):
-                return []
+        class NoMetadataReader(object):
+            def GetMetadata(self, filePath):
+                return {}
 
-        imageCollection = ImageCollection()
-        imageCollection.AddFile(self.InPath("test_HashFile.txt"),
-                                NoMetadataExifTool())
+        imageCollection = ImageCollection(NoMetadataReader())
+        imageCollection.AddFile(self.InPath("test_HashFile.txt"))
         self.assertEqual(imageCollection.GetUniqueImageCount(), 1,
                          "A file without metadata should still be added")
 
@@ -182,13 +183,13 @@ class Test_CopyInto(unittest.TestCase):
                          "Running twice should not create copies")
 
     def test_NoSortFormatKeepsSourceStructure(self):
-        class NoMetadataExifTool(object):
-            def get_metadata(self, *args):
-                return []
+        class NoMetadataReader(object):
+            def GetMetadata(self, filePath):
+                return {}
 
-        collection = ImageCollection()
+        collection = ImageCollection(NoMetadataReader())
         for filePath in self.files:
-            collection.AddFile(filePath, NoMetadataExifTool(), self.src)
+            collection.AddFile(filePath, self.src)
         collection.CopyInto(self.dest, None, copy_files=True)
         for relativePath in ['a/IMG_0001.JPG', 'b/IMG_0001.JPG']:
             self.assertTrue(
@@ -208,25 +209,69 @@ class Test_CopyInto(unittest.TestCase):
                       "Dry run should report the renamed destination")
 
 
-class Test_ExifTool(unittest.TestCase):
+def WriteMp4(filePath, creationDate):
+    """Write a minimal MP4 (ftyp + moov/mvhd) with the given creation date"""
+    def box(boxType, payload):
+        return struct.pack('>I', 8 + len(payload)) + boxType + payload
+    seconds = int((creationDate - datetime(1904, 1, 1)).total_seconds())
+    mvhd = struct.pack('>B3xIIII', 0, seconds, seconds, 600, 6000) \
+        + struct.pack('>IH', 0x00010000, 0x0100) + b'\0' * 10 \
+        + struct.pack('>9I', 0x10000, 0, 0, 0, 0x10000, 0, 0, 0, 0x40000000) \
+        + b'\0' * 24 + struct.pack('>I', 2)
+    with open(filePath, 'wb') as f:
+        f.write(box(b'ftyp', b'isom\0\0\x02\0isommp41'))
+        f.write(box(b'moov', box(b'mvhd', mvhd)))
 
-    class FakeProcess(object):
-        def __init__(self, output):
-            self.stdin = io.BytesIO()
-            readEnd, writeEnd = os.pipe()
-            os.write(writeEnd, output)
-            os.close(writeEnd)
-            self.stdout = os.fdopen(readEnd, 'rb')
 
-    def test_MultiByteCharacterAcrossChunks(self):
-        # 'é' is two bytes: put it across the 4096 bytes read boundary
-        text = 'a' * 4095 + 'é' + 'b' * 10
-        exiftool = ExifTool()
-        exiftool.process = self.FakeProcess(
-            (text + '\n' + ExifTool.sentinel + '\n').encode('utf-8'))
-        self.assertEqual(exiftool.execute('-j').rstrip(), text,
-                         "Output should be decoded once complete")
-        exiftool.process.stdout.close()
+class Test_MetadataReader(unittest.TestCase):
+
+    def setUp(self):
+        self.directory = tempfile.mkdtemp()
+        self.reader = MetadataReader()
+
+    def tearDown(self):
+        shutil.rmtree(self.directory)
+
+    def Dates(self, filePath):
+        metadata = self.reader.GetMetadata(filePath)
+        metadata.pop('FileCreateDate', None)  # depends on the platform
+        return metadata
+
+    def test_PhotoExifDates(self):
+        self.assertEqual(
+            self.Dates(os.path.join(testDataDirectory, imageFileName_1)),
+            {'EXIF DateTimeOriginal': '2021:01:02 14:31:16',
+             'EXIF DateTimeDigitized': '2021:01:02 14:31:16'},
+            "EXIF shooting dates should be read from a photo")
+
+    def test_VideoCreationDate(self):
+        filePath = os.path.join(self.directory, 'video.mp4')
+        WriteMp4(filePath, datetime(2019, 7, 14, 10, 20, 30))
+        self.assertEqual(self.Dates(filePath),
+                         {'CreateDate': '2019:07:14 10:20:30'},
+                         "Creation date should be read from a video")
+
+    def test_VideoWithoutDate(self):
+        filePath = os.path.join(self.directory, 'video.mp4')
+        WriteMp4(filePath, datetime(1904, 1, 1))
+        self.assertEqual(self.Dates(filePath), {},
+                         "An unset video date (1904 origin) should be ignored")
+
+    def test_FileWithoutMetadata(self):
+        filePath = os.path.join(self.directory, 'notes.txt')
+        with open(filePath, 'w') as f:
+            f.write('no metadata here')
+        self.assertEqual(self.Dates(filePath), {},
+                         "A file without metadata should give no date")
+
+    def test_VideoIsSortedByCreationDate(self):
+        filePath = os.path.join(self.directory, 'video.mp4')
+        WriteMp4(filePath, datetime(2019, 7, 14, 10, 20, 30))
+        collection = ImageCollection(self.reader)
+        collection.AddFile(filePath)
+        image = list(collection._content.values())[0]
+        self.assertEqual(image.creationDate, datetime(2019, 7, 14, 10, 20, 30),
+                         "A video should be dated from its metadata")
 
 
 if __name__ == '__main__':
