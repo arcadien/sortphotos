@@ -1,6 +1,6 @@
 name: Python package
 
-on: [push]
+on: [push, pull_request]
 
 jobs:
   build:
@@ -27,15 +27,15 @@ jobs:
           pip install flake8
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
       - name: Lint with flake8
-        run: flake8 sortphotos  --max-line-length 120 --count --show-source --statistics
+        run: flake8 . --exclude .git,sortphotos/exiftool --max-line-length 120 --count --show-source --statistics
       - name: Test with unittest
         run: python test_ImageCollection.py
       - name: Prepare release
         run: |
           (cd sortphotos/exiftool/ && rm -rf html/ fmt_files/ Makefile.PL META.* t validate windows_exiftool pp_build_exe.args perl-Image-ExifTool.spec config_files Changes build_tag_lookup arg_files)
-          zip -r sortphotos.zip example.png README.md sortphotos.py sortphotos
+          zip -r sortphotos.zip README.md sortphotos.py sortphotos
       - name: Release
-        uses: docker://antonyurchenko/git-release:latest
+        uses: docker://antonyurchenko/git-release:v7.0.0
         if: startsWith(github.ref, 'refs/tags/')
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
