@@ -41,7 +41,10 @@ def main():
 
     print(collection)
 
-    collection.CopyInto(args['dest_dir'], args['sort_format'])
+    collection.CopyInto(args['dest_dir'],
+                        args['sort_format'],
+                        copy_files=args['copy_files'],
+                        dry_run=args['test'])
 
 
 if __name__ == '__main__':

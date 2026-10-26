@@ -3,7 +3,7 @@
 from __future__ import print_function
 from __future__ import with_statement
 import os
-from datetime import date, datetime, timedelta
+from datetime import datetime
 import re
 
 
@@ -40,7 +40,7 @@ class Image(object):
     or YYYY:MM:DD HH:MM:SSZ
     """
 
-    def _ParseExifDate(self, date_string, disable_time_zone_adjust):
+    def _ParseExifDate(self, date_string):
         # split into date and time
         # ['YYYY:MM:DD', 'HH:MM:SS']
         # 2016:12:27 16:19:34
@@ -62,15 +62,15 @@ class Image(object):
             return None
 
         # parse hour, min, second
-        time_zone_adjust = False
         hour = 12  # defaulting to noon if no time data provided
         minute = 0
         second = 0
 
         if len(elements) > 1:
-            # ['HH:MM:SS', '+', 'HH:MM']
+            # ['HH:MM:SS', '+', 'HH:MM']: the time zone suffix is dropped,
+            # the local time as written is used for sorting
             if '+' in elements[1] or '-' in elements[1] or 'Z' in elements[1]:
-                time_entries = re.split('(+|-|Z)', elements[1])
+                time_entries = re.split(r'([+-]|Z)', elements[1])
                 # ['HH', 'MM', 'SS']
             else:
                 time_entries = [elements[1]]
@@ -83,23 +83,6 @@ class Image(object):
             elif len(time) == 2:
                 hour = int(time[0])
                 minute = int(time[1])
-
-            # adjust for time-zone if needed
-            if len(time_entries) > 2:
-                # ['HH', 'MM']
-                time_zone = time_entries[2].split(':')
-
-                if len(time_zone) == 2:
-                    time_zone_hour = int(time_zone[0])
-                    time_zone_min = int(time_zone[1])
-
-                    # check if + or -
-                    if time_entries[1] == '-':
-                        time_zone_hour *= -1
-
-                    dateadd = timedelta(hours=time_zone_hour,
-                                        minutes=time_zone_min)
-                    time_zone_adjust = True
 
         # form date object
         try:
@@ -116,15 +99,9 @@ class Image(object):
             # errors in time format
             return None
 
-        # adjust for time zone if necessary
-        if not disable_time_zone_adjust and time_zone_adjust:
-            date += dateadd
-
         return date
 
-    def _GetOldestTimestamp(self,
-                            disable_time_zone_adjust=False,
-                            print_all_tags=False):
+    def _GetOldestTimestamp(self, print_all_tags=False):
 
         # save only the oldest date
         date_available = False
@@ -154,14 +131,12 @@ class Image(object):
 
                 # (rare) check if multiple dates returned in a list,
                 # take the first one which is the oldest
-                if isinstance(date, list):
+                if isinstance(_date, list):
                     _date = _date[0]
 
                 try:
                     # check for poor-formed exif data, but allow continuation
-                    exifdate = self._ParseExifDate(
-                        _date,
-                        disable_time_zone_adjust)
+                    exifdate = self._ParseExifDate(_date)
                 except Exception as e:
                     print('Error while parsing date: {0}'.format(e))
                     exifdate = None

@@ -47,3 +47,9 @@ Symbol meaning in output:
 - `-`: file copied
 - `#`: file moved
 - `~`: file skipped (target exists)
+
+Files are never overwritten: if a different file with the same name already exists
+in the target (or is planned in the same run), a suffix is added (`IMG_0001_1.JPG`).
+A file identical to one already in the target is skipped.
+
+With `-t`/`--test`, nothing is written: each planned copy/move is printed instead.
