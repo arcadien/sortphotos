@@ -1,0 +1,30 @@
+[project]
+name = "sortphotos"
+version = "0.9.2"
+description = "Organizes photos and videos into folders using date/time information"
+readme = "README.md"
+license = "MIT"
+authors = [{ name = "Andrew Ning" }]
+maintainers = [{ name = "Aurélien Labrosse" }]
+requires-python = ">=3.10"
+dependencies = [
+    "exifread>=3.5,<4",
+    "hachoir>=3.4,<4",
+]
+
+[project.urls]
+Homepage = "https://github.com/arcadien/sortphotos"
+
+[project.scripts]
+sortphotos = "sortphotos.cli:main"
+
+[dependency-groups]
+dev = ["flake8>=7.4"]
+
+[build-system]
+requires = ["uv_build>=0.12.21,<0.13.0"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+# flat layout: the package is at the repository root, not under src/
+module-root = ""

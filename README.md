@@ -1,28 +1,35 @@
 
 # Description
 
-SortPhotos is a Python script that organizes photos into folders by date and/or time (year, year/month, year/month/day, or other custom formats).  If you're like me then your growing collection of files are contained in a bunch of folders, some with a date like "Sep 2010", and others which names like "Camping Trip".  SortPhotos takes this collection of folders and files and reorganizes them into a hierarchy of folders by almost any custom date/time format (by default it is by year then month).  It will work with any file, but works best with image and video files that contain EXIF or other metadata formats because that stays with the file even if the files are modified.  The script is also useful for transferring files from your camera into your collection of nicely organized photos.
+SortPhotos is a Python tool that organizes photos into folders by date and/or time (year, year/month, year/month/day, or other custom formats).  If you're like me then your growing collection of files are contained in a bunch of folders, some with a date like "Sep 2010", and others which names like "Camping Trip".  SortPhotos takes this collection of folders and files and reorganizes them into a hierarchy of folders by almost any custom date/time format (by default it is by year then month).  It will work with any file, but works best with image and video files that contain EXIF or other metadata formats because that stays with the file even if the files are modified.  The script is also useful for transferring files from your camera into your collection of nicely organized photos.
 
-# Download
-Find the latest version here:
-https://github.com/arcadien/sortphotos
+# Install
 
-To install it as a `sortphotos` command, from a clone with submodules:
+SortPhotos is written in pure Python (3.10 or later), no external tool is needed.
+Install it as a `sortphotos` command with [uv](https://docs.astral.sh/uv/):
 
-    git clone --recurse-submodules https://github.com/arcadien/sortphotos
-    pip install ./sortphotos
+    uv tool install git+https://github.com/arcadien/sortphotos
+
+or run it once without installing:
+
+    uvx --from git+https://github.com/arcadien/sortphotos sortphotos -h
+
+From a clone, `uv run sortphotos -h` runs the working copy.
+
+Dates are read from photo EXIF (JPEG, TIFF, HEIC, PNG and TIFF based RAW
+like NEF, CR2, DNG) and from video metadata (MP4, MOV, AVI, MKV...). Files
+without a readable date are sorted by their file creation (macOS, Windows)
+or modification date.
 
 # Usage
 
 SortPhotos is intended to be used primarily from the command line.  To see all the options, invoke help
 
-    python sortphotos.py -h
-
-or `sortphotos -h` once installed.
+    sortphotos -h
 
 The simplest usage is to specify a source directory (the directory where your mess of files is currently located) and a destination directory (where you want the files and directories to go).  The source directory is searched recursively, and files are moved unless `-c` is given.
 
-    python sortphotos.py /Users/Me/MessyDirectory /Users/Me/Pictures
+    sortphotos /Users/Me/MessyDirectory /Users/Me/Pictures
 
 ## Options
 

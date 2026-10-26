@@ -38,3 +38,6 @@ nosetests.xml
 
 *.bak
 .vscode/settings.json
+
+# uv
+.venv/

@@ -15,6 +15,7 @@ def main():
 
     # setup command line parsing
     parser = argparse.ArgumentParser(
+        prog='sortphotos',
         formatter_class=argparse.RawTextHelpFormatter,
         description='Sort files (primarily photos and videos) into folders by date\n'
                     'using EXIF and other metadata')
