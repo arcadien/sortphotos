@@ -12,6 +12,9 @@ class Image(object):
     def __init__(self, metadata={}):
         self._metadata = metadata
         self._duplicates = []
+        # path used to rebuild the folder structure in the target,
+        # relative to the source directory (file name by default)
+        self.relativePath = os.path.basename(metadata.get('SourceFile', ''))
         filename, self.creationDate, keys = self._GetOldestTimestamp()
 
     def __repr__(self):

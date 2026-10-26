@@ -167,6 +167,20 @@ class Test_CopyInto(unittest.TestCase):
                          ['first photo', 'second photo'],
                          "Running twice should not create copies")
 
+    def test_NoSortFormatKeepsSourceStructure(self):
+        class NoMetadataExifTool(object):
+            def get_metadata(self, *args):
+                return []
+
+        collection = ImageCollection()
+        for filePath in self.files:
+            collection.AddFile(filePath, NoMetadataExifTool(), self.src)
+        collection.CopyInto(self.dest, None, copy_files=True)
+        for relativePath in ['a/IMG_0001.JPG', 'b/IMG_0001.JPG']:
+            self.assertTrue(
+                os.path.isfile(os.path.join(self.dest, relativePath)),
+                "Source structure should be kept: " + relativePath)
+
     def test_DryRunWritesNothing(self):
         output = io.StringIO()
         with redirect_stdout(output):

@@ -6,7 +6,6 @@ import os
 import shutil
 
 import hashlib
-from pathlib import Path
 
 from sortphotos.ExifTool import ExifTool
 from sortphotos.Image import Image
@@ -38,7 +37,7 @@ class ImageCollection(object):
                         print(fileextension + ' files ignored, "' +
                               file + '" skipped' + "\n")
                         continue
-                    self.AddFile(os.path.join(path, file), e)
+                    self.AddFile(os.path.join(path, file), e, directory)
 
     def CopyInto(self,
                  targetDirectory,
@@ -65,9 +64,7 @@ class ImageCollection(object):
                 dest_file = os.path.join(dest_dir, *dirs, src_fileName)
             else:
                 # copy the same folder structure in the target
-                p = Path(src_file)
-                pathWithoutFirstLevel = Path(*p.parts[2:])
-                dest_file = os.path.join(dest_dir, pathWithoutFirstLevel)
+                dest_file = os.path.join(dest_dir, image.relativePath)
             dest_file = os.path.normpath(dest_file)
 
             dest_file = self._ResolveDestination(
@@ -125,7 +122,12 @@ class ImageCollection(object):
                 b = afile.read(65536)
         return (hasher.hexdigest())
 
-    def AddFile(self, filePath, exifTool):
+    def AddFile(self, filePath, exifTool, sourceDirectory=None):
+        """
+        Add a file to the collection. sourceDirectory is the root the
+        file was found in, used to keep the folder structure when
+        copying without sort format.
+        """
         if 0 == len(filePath):
             return
         fileHash = self.HashFile(filePath)
@@ -153,6 +155,8 @@ class ImageCollection(object):
             metadataDict['SourceFile'] = filePath
             metadataDict['Hash'] = fileHash
             image = Image(metadataDict)
+            if sourceDirectory is not None:
+                image.relativePath = os.path.relpath(filePath, sourceDirectory)
             self._content[fileHash] = image
             print('.', end='')
         else:
