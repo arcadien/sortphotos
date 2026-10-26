@@ -76,7 +76,7 @@ class ImageCollection(object):
                 if dry_run:
                     print('skip {0} (already in target)'.format(src_file))
                 else:
-                    print("~", end='')
+                    print("~", end='', flush=True)
                 continue
             reserved.add(dest_file)
 
@@ -88,10 +88,10 @@ class ImageCollection(object):
             os.makedirs(os.path.dirname(dest_file), exist_ok=True)
             if copy_files:
                 shutil.copy2(src_file, dest_file)
-                print("-", end='')
+                print("-", end='', flush=True)
             else:
                 shutil.move(src_file, dest_file)
-                print("#", end='')
+                print("#", end='', flush=True)
 
     def _ResolveDestination(self, dest_file, fileHash, reserved):
         """
@@ -159,10 +159,10 @@ class ImageCollection(object):
             if sourceDirectory is not None:
                 image.relativePath = os.path.relpath(filePath, sourceDirectory)
             self._content[fileHash] = image
-            print('.', end='')
+            print('.', end='', flush=True)
         else:
             self._content[fileHash].AddDuplicate(filePath)
-            print('+', end='')
+            print('+', end='', flush=True)
 
         self.totalImageCount = self.totalImageCount + 1
         return
