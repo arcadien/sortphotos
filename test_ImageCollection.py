@@ -54,6 +54,20 @@ class Test_ImageCollection(unittest.TestCase):
         self.assertEqual(imageCollection.GetUniqueImageCount(), 1,
                          "A file without metadata should still be added")
 
+    def test_HiddenFilesAreIgnored(self):
+        root = tempfile.mkdtemp()
+        try:
+            os.makedirs(os.path.join(root, '.thumbnails'))
+            for name in ['.hidden.jpg', '.thumbnails/thumb.jpg', 'visible.jpg']:
+                with open(os.path.join(root, name), 'w') as f:
+                    f.write(name)
+            imageCollection = ImageCollection()
+            imageCollection.RecursiveAddDirectory(root)
+            self.assertEqual(imageCollection.totalImageCount, 1,
+                             "Hidden files and directories should be ignored")
+        finally:
+            shutil.rmtree(root)
+
     def test_InstancesDoNotShareContent(self):
         first = ImageCollection()
         first._content['somehash'] = None

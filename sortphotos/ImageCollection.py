@@ -29,7 +29,11 @@ class ImageCollection(object):
     def RecursiveAddDirectory(self, directory, ignore_file_types=[]):
         with ExifTool(verbose=0) as e:
             for (path, dirs, files) in os.walk(directory):
+                # skip hidden directories and files (.*)
+                dirs[:] = [d for d in dirs if not d.startswith('.')]
                 for file in files:
+                    if file.startswith('.'):
+                        continue
                     # ignore specified file extensions
                     fileextension = os.path.splitext(file)[-1]
                     fileextension = fileextension.upper().replace('.', '')
